@@ -15,28 +15,21 @@ const PORT = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === 'production';
 
 const allowedOrigins = [
-  'http://localhost:5173',
-  'https://luxjson.github.io',
   'https://luxjson.is-a.dev',
-  process.env.FRONTEND_URL,
-].filter(Boolean);
+  'https://luxjson.github.io',
+  'http://localhost:5173', 
+  'http://localhost:5000', 
+];
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (!isProduction) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      console.warn(`CORS bloqueou: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 86400,
 }));
 
 app.use(helmet({
