@@ -40,19 +40,33 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginOpenerPolicy: { policy: "unsafe-none" },
   referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  frameguard: { action: "deny" },
+  noSniff: true,
+  xssFilter: true,
+  hidePoweredBy: true,
+  permissionsPolicy: {
+    features: {
+      geolocation: ["'none'"],
+      microphone: ["'none'"],
+      camera: ["'none'"],
+      payment: ["'none'"],
+      usb: ["'none'"],
+    },
+  },
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", allowedOrigins.join(' ')],
+      connectSrc: ["'self'", "https://portfoliobackend-production-a9ba.up.railway.app"],
+      fontSrc: ["'self'", "https:", "data:"],
+      frameAncestors: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      upgradeInsecureRequests: [],
     },
   },
-  frameguard: { action: 'deny' },
-  xssFilter: true,
-  noSniff: true,
-  hidePoweredBy: true,
 }));
 
 app.use(hpp());
