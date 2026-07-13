@@ -17,32 +17,42 @@ const isProduction = process.env.NODE_ENV === 'production';
 const allowedOrigins = [
   'https://luxjson.is-a.dev',
   'https://luxjson.github.io',
-  'http://localhost:5173', 
-  'http://localhost:5000', 
+  'http://localhost:5173',
+  'http://localhost:5000',
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.warn(`CORS bloqueou: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginOpenerPolicy: { policy: "unsafe-none" },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", allowedOrigins.join(' ')],
     },
   },
+  frameguard: { action: 'deny' },
+  xssFilter: true,
+  noSniff: true,
+  hidePoweredBy: true,
 }));
 
 app.use(hpp());
