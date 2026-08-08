@@ -16,6 +16,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const allowedOrigins = [
   'https://luxjson.is-a.dev',
+  'https://api.luxjson.is-a.dev',
   'https://luxjson.github.io',
   'http://localhost:5173',
   'http://localhost:5000',
@@ -96,11 +97,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/blog', blogRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    uptime: process.uptime(),
+  res.status(200).json({
+    status: 'ok'
   });
 });
 

@@ -2,17 +2,29 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
 const BlogPost = require('../models/BlogPost');
+const sanitizeHtml = require('sanitize-html');
 const { slugify } = require('../utils/helpers');
+
 
 // Listar posts (público)
 router.get('/posts', async (req, res, next) => {
   try {
-    const { limit = 10, offset = 0, publishedOnly = true } = req.query;
+    const limit = Math.min(
+      Math.max(Number.parseInt(req.query.limit, 10) || 10, 1),
+      50
+    );
+
+    const offset = Math.max(
+      Number.parseInt(req.query.offset, 10) || 0,
+      0
+    );
+
     const posts = await BlogPost.findAll({
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-      publishedOnly: publishedOnly === 'true',
+      limit,
+      offset,
+      publishedOnly: true,
     });
+
     res.json({ success: true, posts });
   } catch (error) {
     next(error);
@@ -23,13 +35,20 @@ router.get('/posts', async (req, res, next) => {
 router.get('/posts/:slug', async (req, res, next) => {
   try {
     const post = await BlogPost.findBySlug(req.params.slug);
-    if (!post) {
-      return res.status(404).json({ success: false, message: 'Post não encontrado' });
+
+    if (!post || !post.published) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post não encontrado'
+      });
     }
-    if (post.published) {
-      await BlogPost.incrementViews(req.params.slug);
-    }
-    res.json({ success: true, post });
+
+    await BlogPost.incrementViews(req.params.slug);
+
+    res.json({
+      success: true,
+      post
+    });
   } catch (error) {
     next(error);
   }
@@ -53,10 +72,36 @@ router.post('/posts', authMiddleware, async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Título e conteúdo são obrigatórios' });
     }
     const slug = slugify(title);
+    const cleanContent = sanitizeHtml(content, {
+      allowedTags: [
+        'p',
+        'br',
+        'strong',
+        'em',
+        'u',
+        's',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'ul',
+        'ol',
+        'li',
+        'blockquote',
+        'code',
+        'pre',
+        'a'
+      ],
+      allowedAttributes: {
+        a: ['href', 'target', 'rel']
+      },
+      allowedSchemes: ['http', 'https', 'mailto']
+    });
+
     const post = await BlogPost.create({
       title,
       slug,
-      content,
+      content: cleanContent,
       excerpt,
       cover_image,
       author_id: req.admin.id,
@@ -68,14 +113,21 @@ router.post('/posts', authMiddleware, async (req, res, next) => {
   }
 });
 
-// Buscar post por ID (para edição)
 router.get('/posts/id/:id', authMiddleware, async (req, res, next) => {
   try {
-    const result = await pool.query('SELECT * FROM blog_posts WHERE id = $1', [req.params.id]);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Post não encontrado' });
+    const post = await BlogPost.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post não encontrado'
+      });
     }
-    res.json({ success: true, post: result.rows[0] });
+
+    res.json({
+      success: true,
+      post
+    });
   } catch (error) {
     next(error);
   }
@@ -90,7 +142,20 @@ router.put('/posts/:id', authMiddleware, async (req, res, next) => {
       data.title = title;
       data.slug = slugify(title);
     }
-    if (content !== undefined) data.content = content;
+   if (content !== undefined) {
+      data.content = sanitizeHtml(content, {
+        allowedTags: [
+          'p', 'br', 'strong', 'em', 'u', 's',
+          'h1', 'h2', 'h3', 'h4',
+          'ul', 'ol', 'li',
+          'blockquote', 'code', 'pre', 'a'
+        ],
+        allowedAttributes: {
+          a: ['href', 'target', 'rel']
+        },
+        allowedSchemes: ['http', 'https', 'mailto']
+      });
+    }
     if (excerpt !== undefined) data.excerpt = excerpt;
     if (cover_image !== undefined) data.cover_image = cover_image;
     if (published !== undefined) data.published = published;

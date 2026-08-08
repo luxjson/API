@@ -1,9 +1,13 @@
 ﻿const errorHandler = (err, req, res, next) => {
-  console.error('🔥 Erro:', err.stack);
-  res.status(err.status || 500).json({
+  console.error(err);
+
+  const status = err.status || 500;
+
+  res.status(status).json({
     success: false,
-    message: err.message || 'Erro interno do servidor',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    message: status >= 500
+      ? 'Erro interno do servidor'
+      : err.message
   });
 };
 

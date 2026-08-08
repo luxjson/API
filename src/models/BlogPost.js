@@ -1,6 +1,18 @@
 ﻿const { pool } = require('../config/database');
 
-class BlogPost {
+    class BlogPost {
+
+        static async findById(id) {
+        const result = await pool.query(
+            `SELECT *
+            FROM blog_posts
+            WHERE id = $1`,
+            [id]
+        );
+
+        return result.rows[0] || null;
+    }
+
     static async findAll(options = {}) {
         const { limit = 10, offset = 0, publishedOnly = true } = options;
         let whereClause = publishedOnly ? 'WHERE published = true' : '';
