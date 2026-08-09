@@ -75,7 +75,7 @@ router.get('/posts/:slug', async (req, res, next) => {
     if (!post || !post.published) {
       return res.status(404).json({
         success: false,
-        message: 'Post não encontrado'
+        message: 'Post not found or not published'
       });
     }
 
@@ -220,7 +220,7 @@ router.get('/posts/id/:id', authMiddleware, async (req, res, next) => {
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: 'Post não encontrado'
+        message: 'Post not found'
       });
     }
 
@@ -298,7 +298,7 @@ router.put('/posts/:id', authMiddleware, async (req, res, next) => {
 
     const post = await BlogPost.update(req.params.id, data);
     if (!post) {
-      return res.status(404).json({ success: false, message: 'Post não encontrado' });
+      return res.status(404).json({ success: false, message: 'Post not found' });
     }
     res.json({ success: true, post });
   } catch (error) {
@@ -329,7 +329,7 @@ router.put('/posts/:id', authMiddleware, async (req, res, next) => {
 router.delete('/posts/:id', authMiddleware, async (req, res, next) => {
   try {
     await BlogPost.delete(req.params.id);
-    res.json({ success: true, message: 'Post deletado com sucesso' });
+    res.json({ success: true, message: 'Post deleted successfully' });
   } catch (error) {
     next(error);
   }
