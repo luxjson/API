@@ -19,6 +19,26 @@ app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === 'production';
 
+app.use((req, res, next) => {
+  const originalSend = res.send;
+  
+  res.send = function (body) {
+    if (typeof body === 'string' && body.includes('<!DOCTYPE html>') || body.includes('<html')) {
+      const globalHeadTags = `
+        <title>API Documentation</title>
+        <link rel="icon" href="https://luxjson.is-a.dev/favicon.ico" />
+      `;
+      
+      if (body.includes('<head>')) {
+        body = body.replace('<head>', `<head>\n${globalHeadTags}`);
+      }
+    }
+    return originalSend.call(this, body);
+  };
+  
+  next();
+});
+
 const allowedOrigins = [
   'https://luxjson.is-a.dev',
   'https://api.luxjson.is-a.dev',
@@ -127,35 +147,6 @@ app.get('/swagger.json', (req, res) => {
   res.json(swaggerSpec);
 });
 
-app.get('/docs', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-      <head>
-        <title>API Documentation | LUXJSON</title>
-        <link rel="icon" href="https://luxjson.is-a.dev/favicon.ico" />
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
-      <body>
-        <script
-          id="api-reference"
-          data-url="/swagger.json"
-          data-theme="purple"
-          data-show-developer-tools="false">
-        </script>
-        <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
-        <script>
-          setInterval(() => {
-            if (document.title !== 'API Documentation | LUXJSON') {
-              document.title = 'API Documentation | LUXJSON';
-            }
-          }, 100);
-        </script>
-      </body>
-    </html>
-  `);
-});
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({
