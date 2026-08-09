@@ -138,6 +138,7 @@ if (!isProduction) {
 }
 
 app.use(express.json({ limit: '10mb' }));
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use('/api/auth', authRoutes);
@@ -155,15 +156,67 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.json({
-    message: 'API LuxJSON rodando!',
-    version: '1.0.0',
-    endpoints: {
-      health: '/api/health',
-      auth: '/api/auth/login',
-      blog: '/api/blog/posts',
-    },
-  });
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>API Documentation</title>
+        <link rel="icon" href="https://luxjson.is-a.dev/favicon.ico" />
+        <link href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="/style.css" />
+      </head>
+      <body>
+        <div class="container">
+          <div class="card">
+            <img src="https://luxjson.is-a.dev/favicon.png" style="width: 100px; height: 100px; border-radius: 50%"; class="avatar" />
+            <p>API running on <strong>${isProduction ? 'production' : 'development'} mode</strong>.</p>
+            <a class="btn" href="/docs">View Documentation</a>
+          </div>
+
+          <div class="endpoints-list">
+            <h3>Endpoints</h3>
+            <ul id="routes">
+              <p style="color: var(--scalar-color-2); font-size: 13px;">Loading...</p>
+            </ul>
+          </div>
+        </div>
+
+        <script>
+          fetch('/swagger.json')
+            .then(res => res.json())
+            .then(data => {
+              const list = document.getElementById('routes');
+              list.innerHTML = '';
+              
+              for (const [path, methods] of Object.entries(data.paths)) {
+                for (const method of Object.keys(methods)) {
+                  const li = document.createElement('li');
+                  
+                  const spanMethod = document.createElement('span');
+                  spanMethod.className = 'method ' + method.toLowerCase();
+                  spanMethod.innerText = method;
+                  
+                  const a = document.createElement('a');
+                  a.className = 'endpoint-link';
+                  a.href = path;
+                  a.target = '_blank';
+                  a.innerText = path;
+                  
+                  li.appendChild(spanMethod);
+                  li.appendChild(a);
+                  list.appendChild(li);
+                }
+              }
+            })
+            .catch(() => {
+              document.getElementById('routes').innerHTML = '<p style="color: #f87171; font-size: 13px;"> Failed to fetch routes.</p>';
+            });
+        </script>
+      </body>
+    </html>
+  `);
 });
 
 app.use((req, res) => {
