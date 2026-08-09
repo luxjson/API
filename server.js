@@ -145,6 +145,13 @@ app.get('/docs', (req, res) => {
           data-show-developer-tools="false">
         </script>
         <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+        <script>
+          setInterval(() => {
+            if (document.title !== 'API Documentation | LUXJSON') {
+              document.title = 'API Documentation | LUXJSON';
+            }
+          }, 100);
+        </script>
       </body>
     </html>
   `);
