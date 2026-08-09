@@ -5,7 +5,7 @@ const authMiddleware = (req, res, next) => {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ 
             success: false, 
-            message: 'Token não fornecido' 
+            message: 'Token not found' 
         });
     }
 
@@ -18,7 +18,7 @@ const authMiddleware = (req, res, next) => {
     } catch (error) {
         return res.status(401).json({ 
             success: false, 
-            message: 'Token inválido ou expirado' 
+            message: 'Invalid or expired token' 
         });
     }
 };

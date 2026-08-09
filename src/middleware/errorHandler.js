@@ -4,8 +4,8 @@
   if (err.code === '23505') {
     return res.status(400).json({
       success: false,
-      error: 'DUPLICATE_SLUG',
-      message: 'Já existe um post com este título. Escolha um título diferente.'
+      error: 'bad-request',
+      message: 'Duplicate string. Please try again.'
     });
   }
 
@@ -13,7 +13,7 @@
   res.status(status).json({
     success: false,
     message: status >= 500
-      ? 'Erro interno do servidor'
+      ? 'Internal server error'
       : err.message
   });
 };

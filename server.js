@@ -222,18 +222,18 @@ app.get('/', (req, res) => {
 });
 
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: `Rota não encontrada: ${req.method} ${req.url}` });
+  res.status(404).json({ success: false, message: `Route not found: ${req.method} ${req.url}` });
 });
 
 app.use(errorHandler);
 
 process.on('uncaughtException', (err) => {
-  console.error('Erro não capturado:', err);
+  console.error('Uncaught Exception:', err);
   if (isProduction) process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {
-  console.error('Promessa rejeitada:', reason);
+  console.error('Unhandled Rejection:', reason);
   if (isProduction) process.exit(1);
 });
 
