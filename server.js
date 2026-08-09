@@ -126,59 +126,28 @@ app.get('/swagger.json', (req, res) => {
   res.json(swaggerSpec);
 });
 
-app.get('/docs', redoc({
-  title: 'LUXJSON - API Documentation',
-  specUrl: '/swagger.json',
-  options: {
-    theme: {
-      colors: {
-        primary: {
-          main: '#38bdf8' // Azul moderno para links e destaques
-        },
-        text: {
-          primary: '#f1f5f9',   // Texto principal bem claro
-          secondary: '#94a3b8'  // Texto secundário cinza elegante
-        },
-        background: {
-          main: '#0b0f17',      // Fundo geral ultra escuro
-          light: '#111622'      // Fundo alternativo
-        },
-        responses: {
-          ok: { color: '#34d399' },
-          error: { color: '#f87171' }
-        },
-        http: {
-          get: '#38bdf8',
-          post: '#34d399',
-          put: '#fbbf24',
-          delete: '#f87171'
-        }
-      },
-      typography: {
-        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-        headings: {
-          fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-          fontWeight: '700'
-        },
-        code: {
-          fontFamily: 'Fira Code, monospace',
-          fontSize: '13px',
-          backgroundColor: '#070a0f'
-        }
-      },
-      sidebar: {
-        backgroundColor: '#111622', // Fundo da barra lateral idêntico ao seu portfólio
-        textColor: '#cbd5e1',
-        activeTextColor: '#ffffff',
-        groupBackgroundColor: '#0b0f17'
-      },
-      rightPanel: {
-        backgroundColor: '#070a0f', // Fundo dos exemplos de código (lado direito) bem escuro
-        textColor: '#f1f5f9'
-      }
-    }
-  }
-}));
+app.get('/docs', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+      <head>
+        <title>API Documentation | LUXJSON</title>
+        <link rel="icon" href="https://luxjson.is-a.dev/favicon.ico" />
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body>
+        <script
+          id="api-reference"
+          data-url="/swagger.json"
+          data-theme="purple"
+          data-show-developer-tools="false">
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+      </body>
+    </html>
+  `);
+});
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({
