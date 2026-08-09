@@ -14,7 +14,6 @@ exports.login = async (req, res, next) => {
     try {
         const { username, password } = req.body;
 
-        // Validação básica
         if (!username || !password) {
             return res.status(400).json({ 
                 success: false, 
@@ -22,7 +21,6 @@ exports.login = async (req, res, next) => {
             });
         }
 
-        // Buscar admin
         const admin = await Admin.findByUsername(username);
         if (!admin) {
             return res.status(401).json({ 
@@ -31,7 +29,6 @@ exports.login = async (req, res, next) => {
             });
         }
 
-        // Comparar senha
         const isValid = await bcrypt.compare(password, admin.password_hash);
         if (!isValid) {
             return res.status(401).json({ 
@@ -40,10 +37,8 @@ exports.login = async (req, res, next) => {
             });
         }
 
-        // Gerar token
         const token = generateToken(admin);
 
-        // Remover hash da resposta
         delete admin.password_hash;
 
         res.json({
