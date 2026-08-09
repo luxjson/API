@@ -94,7 +94,7 @@ contentSecurityPolicy: {
         "https://fonts.googleapis.com"
       ],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://portfoliobackend-production-a9ba.up.railway.app"],
+      connectSrc: ["'self'", "https://luxjson.up.railway.app"],
       fontSrc: ["'self'", "https:", "data:", "https://fonts.gstatic.com"],
       frameAncestors: ["'none'"],
       baseUri: ["'self'"],
