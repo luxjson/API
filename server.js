@@ -101,6 +101,7 @@ contentSecurityPolicy: {
       formAction: ["'self'"],
       upgradeInsecureRequests: [],
     },
+    
   },
 }));
 
