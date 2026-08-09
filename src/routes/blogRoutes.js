@@ -6,7 +6,26 @@ const sanitizeHtml = require('sanitize-html');
 const { slugify } = require('../utils/helpers');
 
 
-// Listar posts (público)
+/**
+ * @swagger
+ * /api/blog/posts:
+ *   get:
+ *     summary: List all published posts
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Maximum number of posts per page (max 50)
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         description: Offset for pagination
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the list of posts
+ */
 router.get('/posts', async (req, res, next) => {
   try {
     const limit = Math.min(
@@ -31,7 +50,24 @@ router.get('/posts', async (req, res, next) => {
   }
 });
 
-// Buscar post por slug (público)
+/**
+ * @swagger
+ * /api/blog/posts/{slug}:
+ *   get:
+ *     summary: Retrieve a published post by slug and increment views
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Post slug
+ *     responses:
+ *       200:
+ *         description: Post successfully found
+ *       404:
+ *         description: Post not found or not published
+ */
 router.get('/posts/:slug', async (req, res, next) => {
   try {
     const post = await BlogPost.findBySlug(req.params.slug);
@@ -54,7 +90,19 @@ router.get('/posts/:slug', async (req, res, next) => {
   }
 });
 
-// Estatísticas (protegido)
+/**
+ * @swagger
+ * /api/blog/stats:
+ *   get:
+ *     summary: Return general blog statistics (Authentication Required)
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Statistics successfully retrieved
+ *       401:
+ *         description: Unauthorized (Missing or invalid token)
+ */
 router.get('/stats', authMiddleware, async (req, res, next) => {
   try {
     const stats = await BlogPost.getStats();
@@ -64,7 +112,39 @@ router.get('/stats', authMiddleware, async (req, res, next) => {
   }
 });
 
-// Criar post (protegido)
+/**
+ * @swagger
+ * /api/blog/posts:
+ *   post:
+ *     summary: Create a new post (Authentication Required)
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - content
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               excerpt:
+ *                 type: string
+ *               cover_image:
+ *                 type: string
+ *               published:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: Post successfully created
+ *       400:
+ *         description: Title or content are required
+ */
 router.post('/posts', authMiddleware, async (req, res, next) => {
   try {
     const { title, content, excerpt, cover_image, published = false } = req.body;
@@ -113,6 +193,26 @@ router.post('/posts', authMiddleware, async (req, res, next) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/blog/posts/id/{id}:
+ *   get:
+ *     summary: Retrieve a post by ID (Authentication Required)
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Post ID
+ *     responses:
+ *       200:
+ *         description: Post successfully found
+ *       404:
+ *         description: Post not found
+ */
 router.get('/posts/id/:id', authMiddleware, async (req, res, next) => {
   try {
     const post = await BlogPost.findById(req.params.id);
@@ -133,7 +233,43 @@ router.get('/posts/id/:id', authMiddleware, async (req, res, next) => {
   }
 });
 
-// Atualizar post (protegido)
+/**
+ * @swagger
+ * /api/blog/posts/{id}:
+ *   put:
+ *     summary: Update an existing post (Authentication Required)
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the post to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               excerpt:
+ *                 type: string
+ *               cover_image:
+ *                 type: string
+ *               published:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Post successfully updated
+ *       404:
+ *         description: Post not found
+ */
 router.put('/posts/:id', authMiddleware, async (req, res, next) => {
   try {
     const { title, content, excerpt, cover_image, published } = req.body;
@@ -170,7 +306,26 @@ router.put('/posts/:id', authMiddleware, async (req, res, next) => {
   }
 });
 
-// Deletar post (protegido)
+/**
+ * @swagger
+ * /api/blog/posts/{id}:
+ *   delete:
+ *     summary: Delete a post by ID (Authentication Required)
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the post to delete
+ *     responses:
+ *       200:
+ *         description: Post successfully deleted
+ *       404:
+ *         description: Post not found
+ */
 router.delete('/posts/:id', authMiddleware, async (req, res, next) => {
   try {
     await BlogPost.delete(req.params.id);
