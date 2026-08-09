@@ -8,16 +8,16 @@
    <img src="https://github.com/luxjson/luxjson.github.io/blob/main/src/assets/images/icon2.png" width="100px" height="100px" style="border-radius: 30%" align="left">
    
    
-   ### `LUXJSON`
+   ### `API`
    
    ![Status](https://img.shields.io/badge/STATUS-OPERATIONAL-green)
-   ![Version](https://img.shields.io/badge/VERSION-1.2-gold)
+   ![Version](https://img.shields.io/badge/VERSION-1.7-gold)
    ![OS](https://img.shields.io/badge/OS-WEB-red)
    
-   **LUXJSON** - An portfolio website.
+   **LUXJSON API** - An portfolio API.
    
    <div flex="true">
-     <a href="https://luxjson.github.io">
+     <a href="https://api.luxjson.is-a.dev">
        Check Out
      </a>
      •
