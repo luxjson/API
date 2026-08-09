@@ -11,7 +11,7 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000', // url de producao da api [api.luxjson.is-a.dev]
+        url: 'https://portfoliobackend-production-a9ba.up.railway.app', // url de producao da api [api.luxjson.is-a.dev]
         description: 'LUXJSON API',
       },
     ],
