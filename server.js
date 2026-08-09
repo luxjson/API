@@ -19,26 +19,34 @@ app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === 'production';
 
-app.use((req, res, next) => {
+// ----------------------------------------------------
+// 1. CRIAÇÃO DOS SUB-APLICATIVOS EXPRESS
+// ----------------------------------------------------
+const docsApp = express();
+const mainApp = express();
+
+// Middleware Global de Injeção de favicon/head (Modificado para funcionar em ambos)
+const globalHeadInject = (req, res, next) => {
   const originalSend = res.send;
-  
   res.send = function (body) {
-    if (typeof body === 'string' && body.includes('<!DOCTYPE html>') || body.includes('<html')) {
+    if (typeof body === 'string' && (body.includes('<!DOCTYPE html>') || body.includes('<html'))) {
       const globalHeadTags = `
         <title>API Documentation</title>
         <link rel="icon" href="https://luxjson.is-a.dev/favicon.ico" />
       `;
-      
       if (body.includes('<head>')) {
         body = body.replace('<head>', `<head>\n${globalHeadTags}`);
       }
     }
     return originalSend.call(this, body);
   };
-  
   next();
-});
+};
 
+docsApp.use(globalHeadInject);
+mainApp.use(globalHeadInject);
+
+// Configurações Globais Compartilhadas (CORS, Helmet, BodyParsers)
 const allowedOrigins = [
   'https://luxjson.is-a.dev',
   'https://api.luxjson.is-a.dev',
@@ -47,7 +55,7 @@ const allowedOrigins = [
   'http://localhost:5000',
 ];
 
-app.use(cors({
+const corsOptions = cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -60,9 +68,9 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+});
 
-app.use(helmet({
+const helmetConfig = helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginOpenerPolicy: { policy: "unsafe-none" },
   referrerPolicy: { policy: "strict-origin-when-cross-origin" },
@@ -79,36 +87,21 @@ app.use(helmet({
       usb: ["'none'"],
     },
   },
-contentSecurityPolicy: {
+  contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: [
-        "'self'", 
-        "'unsafe-inline'", 
-        "https://unpkg.com", 
-        "https://cdn.jsdelivr.net"
-      ],
-      styleSrc: [
-        "'self'", 
-        "'unsafe-inline'", 
-        "https://fonts.googleapis.com"
-      ],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://luxjson.up.railway.app"],
+      connectSrc: ["'self'", "https://luxjson.up.railway.app", "https://docs.luxjson.up.railway.app"],
       fontSrc: ["'self'", "https:", "data:", "https://fonts.gstatic.com"],
       frameAncestors: ["'none'"],
       baseUri: ["'self'"],
       formAction: ["'self'"],
       upgradeInsecureRequests: [],
     },
-    
   },
-}));
-
-
-
-app.use(hpp());
-app.use(compression());
+});
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -117,10 +110,31 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use(limiter);
 
-app.use(
-  '/docs',
+// Aplicar segurança básicos e parsers em ambas as sub-apps
+[mainApp, docsApp].forEach((subApp) => {
+  subApp.use(corsOptions);
+  subApp.use(helmetConfig);
+  subApp.use(hpp());
+  subApp.use(compression());
+  subApp.use(limiter);
+  subApp.use(express.json({ limit: '10mb' }));
+  subApp.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  if (!isProduction) {
+    subApp.use(morgan('dev'));
+  } else {
+    subApp.use(morgan('combined'));
+  }
+});
+
+mainApp.use(express.static('public'));
+
+// ----------------------------------------------------
+// 2. ROTAS EXCLUSIVAS DO SUBDOMÍNIO (docsApp)
+// ----------------------------------------------------
+// Agora o Scalar roda direto na raiz '/' do subdomínio docs.luxjson.up.railway.app
+docsApp.use(
+  '/',
   apiReference({
     spec: {
       content: swaggerSpec,
@@ -132,31 +146,21 @@ app.use(
   })
 );
 
-if (!isProduction) {
-  app.use(morgan('dev'));
-} else {
-  app.use(morgan('combined'));
-}
+// ----------------------------------------------------
+// 3. ROTAS DO DOMÍNIO PRINCIPAL (mainApp)
+// ----------------------------------------------------
+mainApp.use('/api/auth', authRoutes);
+mainApp.use('/api/blog', blogRoutes);
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-app.use('/api/auth', authRoutes);
-app.use('/api/blog', blogRoutes);
-
-app.get('/swagger.json', (req, res) => {
+mainApp.get('/swagger.json', (req, res) => {
   res.json(swaggerSpec);
 });
 
-
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok'
-  });
+mainApp.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
 
-app.get('/', (req, res) => {
+mainApp.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -171,9 +175,10 @@ app.get('/', (req, res) => {
       <body>
         <div class="container">
           <div class="card">
-            <img src="https://luxjson.is-a.dev/favicon.png" style="width: 100px; height: 100px; border-radius: 50%"; class="avatar" />
+            <img src="https://luxjson.is-a.dev/favicon.png" style="width: 100px; height: 100px; border-radius: 50%;" class="avatar" />
             <p>API running on <strong>${isProduction ? 'production' : 'development'} mode</strong>.</p>
-            <a class="btn" href="/docs">View Documentation</a>
+            <!-- Redireciona o usuário para o subdomínio correto -->
+            <a class="btn" href="https://docs.luxjson.up.railway.app">View Documentation</a>
           </div>
 
           <div class="endpoints-list">
@@ -190,21 +195,17 @@ app.get('/', (req, res) => {
             .then(data => {
               const list = document.getElementById('routes');
               list.innerHTML = '';
-              
               for (const [path, methods] of Object.entries(data.paths)) {
                 for (const method of Object.keys(methods)) {
                   const li = document.createElement('li');
-                  
                   const spanMethod = document.createElement('span');
                   spanMethod.className = 'method ' + method.toLowerCase();
                   spanMethod.innerText = method;
-                  
                   const a = document.createElement('a');
                   a.className = 'endpoint-link';
                   a.href = path;
                   a.target = '_blank';
                   a.innerText = path;
-                  
                   li.appendChild(spanMethod);
                   li.appendChild(a);
                   list.appendChild(li);
@@ -220,12 +221,30 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.use((req, res) => {
-  res.status(404).json({ success: false, message: `Rota não encontrada: ${req.method} ${req.url}` });
+// Tratamento de Erros e 404 em cada App individualmente
+[mainApp, docsApp].forEach((subApp) => {
+  subApp.use((req, res) => {
+    res.status(404).json({ success: false, message: `Rota não encontrada: ${req.method} ${req.url}` });
+  });
+  subApp.use(errorHandler);
 });
 
-app.use(errorHandler);
+// ----------------------------------------------------
+// 4. ROTEADOR DE SUBDOMÍNIOS (MIDDLEWARE CENTRAL)
+// ----------------------------------------------------
+app.use((req, res, next) => {
+  const host = req.headers.host || '';
+  
+  // Captura requisições para o subdomínio docs
+  if (host.startsWith('docs.luxjson.up.railway.app') || host.startsWith('docs.localhost')) {
+    return docsApp(req, res, next);
+  }
+  
+  // Qualquer outro host cai na aplicação padrão/principal
+  return mainApp(req, res, next);
+});
 
+// Processos Globais de Saída
 process.on('uncaughtException', (err) => {
   console.error('Erro não capturado:', err);
   if (isProduction) process.exit(1);
