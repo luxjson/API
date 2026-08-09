@@ -41,6 +41,7 @@ app.use((req, res, next) => {
 
 const allowedOrigins = [
   'https://luxjson.is-a.dev',
+  'https://luxjson.up.railway.app',
   'https://api.luxjson.is-a.dev',
   'https://luxjson.github.io',
   'http://localhost:5173',

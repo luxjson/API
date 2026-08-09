@@ -11,7 +11,7 @@ const pool = new Pool({
 });
 
 pool.on('error', (err) => {
-    console.error('Erro inesperado no pool do PostgreSQL:', err);
+    console.error('Unable to connect to PostgreSQL:', err);
 });
 
 module.exports = { pool };
