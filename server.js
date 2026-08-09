@@ -53,7 +53,7 @@ app.use(cors({
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      console.warn(`CORS bloqueou: ${origin}`);
+      console.warn(`CORS blocked: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -237,7 +237,7 @@ process.on('unhandledRejection', (reason) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-  console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`CORS: ${isProduction ? 'Restrito' : 'Todas origens (DEV)'}`);
+  console.log(`API running on PORT: ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`CORS: ${isProduction ? 'Restrict' : 'All origins (DEV)'}`);
 });
