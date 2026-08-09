@@ -149,7 +149,7 @@ router.post('/posts', authMiddleware, async (req, res, next) => {
   try {
     const { title, content, excerpt, cover_image, published = false } = req.body;
     if (!title || !content) {
-      return res.status(400).json({ success: false, message: 'Título e conteúdo são obrigatórios' });
+      return res.status(400).json({ success: false, message: 'Title and content are required' });
     }
     const slug = slugify(title);
     const cleanContent = sanitizeHtml(content, {
