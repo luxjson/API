@@ -8,7 +8,7 @@
    <img src="https://github.com/luxjson/luxjson.github.io/blob/main/src/assets/images/icon2.png" width="100px" height="100px" style="border-radius: 30%" align="left">
    
    
-   ### `API`
+   ### `LUXJSON API`
    
    ![Status](https://img.shields.io/badge/STATUS-OPERATIONAL-green)
    ![Version](https://img.shields.io/badge/VERSION-1.7-gold)
