@@ -41,7 +41,7 @@ app.use((req, res, next) => {
 
 const allowedOrigins = [
   'https://luxjson.is-a.dev',
-  'https://luxjson.up.railway.app',
+  'https://luxjson.vercel.app',
   'https://api.luxjson.is-a.dev',
   'https://luxjson.github.io',
   'http://localhost:5173',
@@ -95,7 +95,7 @@ contentSecurityPolicy: {
         "https://fonts.googleapis.com"
       ],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://luxjson.up.railway.app", "http://localhost:5000"],
+      connectSrc: ["'self'", "https://luxjson.vercel.app", "http://localhost:5000"],
       fontSrc: ["'self'", "https:", "data:", "https://fonts.gstatic.com"],
       frameAncestors: ["'none'"],
       baseUri: ["'self'"],
