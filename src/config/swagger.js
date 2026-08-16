@@ -3,10 +3,8 @@ const swaggerUi = require('swagger-ui-express');
 
 const options = {
   definition: {
-    openapi: '3.0.0',
     info: {
         title: 'LUXJSON API',
-        version: '1.0.0',
         description: 'Welcome to the official API documentation. <br/> **Note:** Endpoints marked with a lock require a valid JWT Token to execute.',
     },
     servers: [

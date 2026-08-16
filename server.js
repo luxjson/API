@@ -120,6 +120,9 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+delete swaggerSpec.openapi;
+delete swaggerSpec.swagger;
+
 app.use(
   '/docs',
   apiReference({
@@ -129,7 +132,10 @@ app.use(
     theme: 'purple',
     pageTitle: 'API Documentation | LUXJSON',
     favicon: 'https://luxjson.is-a.dev/favicon.ico',
-    showDeveloperTools: "never"
+    showDeveloperTools: "never",
+    hideVersion: true,
+    hideDownloadButton: true,
+    hiddenClients: true,
   })
 );
 
