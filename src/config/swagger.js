@@ -9,7 +9,7 @@ const options = {
     },
     servers: [
       {
-        url: 'https://luxjson.up.railway.app', // url de producao da api [api.luxjson.is-a.dev]
+        url: 'https://luxjson.vercel.app', // url de producao da api [api.luxjson.is-a.dev]
         description: 'LUXJSON API',
       },
     ],
