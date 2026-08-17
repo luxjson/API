@@ -42,26 +42,56 @@ app.use((req, res, next) => {
 const allowedOrigins = [
   'https://luxjson.is-a.dev',
   'https://api.luxjson.is-a.dev',
-  'https://api.luxjson.is-a.dev',
   'https://luxjson.github.io',
+
+  // React + Vite
   'http://localhost:5173',
+  'http://127.0.0.1:5173',
+
+  // Expo Web
+  'http://localhost:8081',
+  'http://127.0.0.1:8081',
+
+  // Backend local
   'http://localhost:5000',
+  'http://127.0.0.1:5000',
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
       console.warn(`CORS blocked: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+      return callback(new Error(`Origin não permitida pelo CORS: ${origin}`));
+    },
+
+    credentials: false,
+
+    methods: [
+      'GET',
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE',
+      'OPTIONS',
+    ],
+
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+    ],
+
+    optionsSuccessStatus: 204,
+  })
+);
 
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
