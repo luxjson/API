@@ -11,7 +11,7 @@
    ### `LUXJSON API`
    
    ![Status](https://img.shields.io/badge/STATUS-OPERATIONAL-green)
-   ![Version](https://img.shields.io/badge/VERSION-1.7-gold)
+   ![Version](https://img.shields.io/badge/VERSION-1.000124-gold)
    ![OS](https://img.shields.io/badge/OS-WEB-red)
    
    **LUXJSON API** - An portfolio API.
