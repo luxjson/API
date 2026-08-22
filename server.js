@@ -1,4 +1,4 @@
-﻿require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const hpp = require('hpp');
 const authRoutes = require('./src/routes/authRoutes');
 const blogRoutes = require('./src/routes/blogRoutes');
+const communityRoutes = require('./src/routes/communityRoutes');
 const { errorHandler } = require('./src/middleware/errorHandler');
 const setupSwagger = require('./src/config/swagger');
 const redoc = require('redoc-express');
@@ -23,7 +24,10 @@ app.use((req, res, next) => {
   const originalSend = res.send;
   
   res.send = function (body) {
-    if (typeof body === 'string' && body.includes('<!DOCTYPE html>') || body.includes('<html')) {
+    if (
+      typeof body === 'string' &&
+      (body.includes('<!DOCTYPE html>') || body.includes('<html'))
+    ) {
       const globalHeadTags = `
         <title>API Documentation</title>
         <link rel="icon" href="https://luxjson.is-a.dev/favicon.ico" />
@@ -181,6 +185,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/blog', blogRoutes);
+app.use('/api/community', communityRoutes);
 
 app.get('/swagger.json', (req, res) => {
   res.json(swaggerSpec);
